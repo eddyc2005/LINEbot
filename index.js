@@ -2,6 +2,9 @@ var linebot = require('linebot');
 var express = require('express');
 var {google} = require("googleapis")
 var googleAuth = require('google-auth-library');
+var fs = require('fs');
+var authorize = require('node-authorization');
+
 
 var bot = linebot({
     channelId: '1647433696',
@@ -37,8 +40,6 @@ var bot = linebot({
 // });
 
 
-
-
 //with google sheets api
 
 //底下輸入client_secret.json檔案的內容
@@ -58,13 +59,7 @@ var auth = new googleAuth();
 var oauth2Client = new google.auth.OAuth2(myClientSecret.installed.client_id, myClientSecret.installed.client_secret, myClientSecret.installed.redirect_uris[0]);
 
 //底下輸入sheetsapi.json檔案的內容
-oauth2Client.credentials = {
-    "access_token": "ya29.Glu0BvP45EvhqxX2rjnEsaJ_O_f-ywtAwS9tSfnNIbtM2Y6sOlw10pflERuQUO6wVDhghI9fvDfMQvl5tLD6oGmmD3vQUmeK9RddZfRrdmENA99MnRqTUvcDSkNB",
-    "refresh_token": "1/6zTHdfng0e-mx3owwec4a_PwX2SwgUT5uaUQcCJ-RXw",
-    "scope": "https://www.googleapis.com/auth/spreadsheets.readonly",
-    "token_type": "Bearer",
-    "expiry_date": 1550489539351
-}
+oauth2Client.credentials = {"access_token":"ya29.Glu1BqFmF3z3OtkBUr024AkndG52cmNUv97LuJWwy1xIJq1Ootdt03lhrNcK24zYzdwxvEfxbkHiBpGTiRr-AuHHfL-0SqSiu5ney8XFOvA1nZ8dmPQOlaCXN6BI","refresh_token":"1/BGGJjKuNmnm4kC_jwJe9dD-RSZjjn7xVpHR5ReRqBtk","scope":"https://www.googleapis.com/auth/spreadsheets","token_type":"Bearer","expiry_date":1550576476783}
 
 //試算表的ID，引號不能刪掉
 var mySheetId = '1S1UMVJ-c942MpfOj5QBEHt2fsbGZzQi-yGLA1xKjle0';
@@ -167,10 +162,6 @@ function sendMessage(eve, msg) {
         return false;
     });
 }
-
-
-
-
 
 
 const app = express();

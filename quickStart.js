@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 // If modifying these scopes, delete credentials.json.
-const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
     const TOKEN_PATH = 'credentials.json';
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', (err, content) => {

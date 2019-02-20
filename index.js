@@ -4,6 +4,7 @@ var {google} = require("googleapis")
 var googleAuth = require('google-auth-library');
 var fs = require('fs');
 var authorize = require('node-authorization');
+var request = require('request');
 
 
 var bot = linebot({
@@ -59,7 +60,13 @@ var auth = new googleAuth();
 var oauth2Client = new google.auth.OAuth2(myClientSecret.installed.client_id, myClientSecret.installed.client_secret, myClientSecret.installed.redirect_uris[0]);
 
 //底下輸入sheetsapi.json檔案的內容
-oauth2Client.credentials = {"access_token":"ya29.Glu1BqFmF3z3OtkBUr024AkndG52cmNUv97LuJWwy1xIJq1Ootdt03lhrNcK24zYzdwxvEfxbkHiBpGTiRr-AuHHfL-0SqSiu5ney8XFOvA1nZ8dmPQOlaCXN6BI","refresh_token":"1/BGGJjKuNmnm4kC_jwJe9dD-RSZjjn7xVpHR5ReRqBtk","scope":"https://www.googleapis.com/auth/spreadsheets","token_type":"Bearer","expiry_date":1550576476783}
+oauth2Client.credentials = {
+    "access_token": "ya29.Glu1BqFmF3z3OtkBUr024AkndG52cmNUv97LuJWwy1xIJq1Ootdt03lhrNcK24zYzdwxvEfxbkHiBpGTiRr-AuHHfL-0SqSiu5ney8XFOvA1nZ8dmPQOlaCXN6BI",
+    "refresh_token": "1/BGGJjKuNmnm4kC_jwJe9dD-RSZjjn7xVpHR5ReRqBtk",
+    "scope": "https://www.googleapis.com/auth/spreadsheets",
+    "token_type": "Bearer",
+    "expiry_date": 1550576476783
+}
 
 //試算表的ID，引號不能刪掉
 var mySheetId = '1S1UMVJ-c942MpfOj5QBEHt2fsbGZzQi-yGLA1xKjle0';
@@ -79,7 +86,7 @@ function getQuestions() {
     sheets.spreadsheets.values.get({
         auth: oauth2Client,
         spreadsheetId: mySheetId,
-        range: encodeURI('ques!A1:E'),
+        range: encodeURI('test!A1:B'),
     }, function (err, response) {
         if (err) {
             console.log('讀取問題檔的API產生問題：' + err);
@@ -122,34 +129,54 @@ function appendMyRow(userId) {
 
 //LineBot收到user的文字訊息時的處理函式
 bot.on('message', function (event) {
-    if (event.message.type === 'text') {
-        var myId = event.source.userId;
-        if (users[myId] == undefined) {
-            users[myId] = [];
-            users[myId].userId = myId;
-            users[myId].step = -1;
-            users[myId].replies = [];
-        }
-        var myStep = users[myId].step;
-        if (myStep === -1)
-            sendMessage(event, myQuestions[0][0]);
-        else {
-            if (myStep == (totalSteps - 1))
-                sendMessage(event, myQuestions[1][myStep]);
-            else
-                sendMessage(event, myQuestions[1][myStep] + '\n' + myQuestions[0][myStep + 1]);
-            users[myId].replies[myStep + 1] = event.message.text;
-        }
-        myStep++;
-        users[myId].step = myStep;
-        if (myStep >= totalSteps) {
-            myStep = -1;
-            users[myId].step = myStep;
-            users[myId].replies[0] = new Date();
-            appendMyRow(myId);
+        if (event.message.type === 'text') {
+            //google sheet
+            // var myId = event.source.userId;
+            // if (users[myId] == undefined) {
+            //     users[myId] = [];
+            //     users[myId].userId = myId;
+            //     users[myId].step = -1;
+            //     users[myId].replies = [];
+            // }
+            // var myStep = users[myId].step;
+            // if (myStep === -1)
+            //     sendMessage(event, myQuestions[0][0]);
+            // else {
+            //     if (myStep == (totalSteps - 1))
+            //         sendMessage(event, myQuestions[1][myStep]);
+            //     else
+            //         sendMessage(event, myQuestions[1][myStep] + '\n' + myQuestions[0][myStep + 1]);
+            //     users[myId].replies[myStep + 1] = event.message.text;
+            // }
+            // myStep++;
+            // users[myId].step = myStep;
+            // if (myStep >= totalSteps) {
+            //     myStep = -1;
+            //     users[myId].step = myStep;
+            //     users[myId].replies[0] = new Date();
+            //     appendMyRow(myId);
+            // }
+
+
+            //回應google試算表對應文字
+            var msg = event.message.text;
+            //收到文字訊息時，直接把收到的訊息傳回去
+            var resText = '';
+            for (let i = 0; i < myQuestions.length; i++) {
+                if (msg == myQuestions[i][0]) {
+                    resText = myQuestions[i][1];
+                }
+            }
+            event.reply(resText).then(function (data) {
+                // 傳送訊息成功時，可在此寫程式碼
+                console.log(resText);
+            }).catch(function (error) {
+                // 傳送訊息失敗時，可在此寫程式碼
+                console.log('錯誤產生，錯誤碼：' + error);
+            });
         }
     }
-});
+);
 
 
 //這是發送訊息給user的函式

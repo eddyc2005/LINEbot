@@ -49,9 +49,10 @@ function getNewToken(oAuth2Client, callback) {
             if (err) return callback(err);
             oAuth2Client.setCredentials(token);
 // Store the token to disk for later program executions
-            fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                if (err) console.error(err);
-                console.log('Token stored to', TOKEN_PATH);
+            fs.writeFile(TOKEN_PATH, JSON.stringify(token), (val) => {
+                // if (err) console.error(err);
+                // console.log('Token stored to', TOKEN_PATH);
+                console.log(val);
             });
             callback(oAuth2Client);
         });
@@ -65,8 +66,8 @@ function getNewToken(oAuth2Client, callback) {
 function listMajors(auth) {
     const sheets = google.sheets({version: 'v4', auth});
     sheets.spreadsheets.values.get({
-        spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-    range: 'Class Data!A2:E',
+        spreadsheetId: '1S1UMVJ-c942MpfOj5QBEHt2fsbGZzQi-yGLA1xKjle0',
+    range: 'ques!A1:D3',
 }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
         const rows = res.data.values;
@@ -74,7 +75,7 @@ function listMajors(auth) {
             console.log('Name, Major:');
 // Print columns A and E, which correspond to indices 0 and 4.
             rows.map((row) => {
-                console.log(`${row[0]}, ${row[4]}`);
+                console.log(`${row[0]}, ${row[1]}, ${row[2]}, ${row[3]}`);
             });
         } else {
             console.log('No data found.');

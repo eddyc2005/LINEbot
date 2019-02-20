@@ -161,15 +161,22 @@ bot.on('message', function (event) {
             //回應google試算表對應文字
             var msg = event.message.text;
             //收到文字訊息時，直接把收到的訊息傳回去
-            var resText = '';
+            var res = '';
             for (let i = 0; i < myQuestions.length; i++) {
                 if (msg == myQuestions[i][0]) {
-                    resText = myQuestions[i][1];
+                    res = myQuestions[i][1];
                 }
             }
-            event.reply(resText).then(function (data) {
+            //回傳圖片
+            if(msg == '圖') {
+                res = {
+                    "type": "image",
+                    "originalContentUrl": "https://i.h2.pdim.gs/dmfd/200_200_100/9490e68119724f531abd2d1f6412b312.jpeg",
+                    "previewImageUrl": "https://i.h2.pdim.gs/dmfd/200_200_100/9490e68119724f531abd2d1f6412b312.jpeg"
+                }
+            }
+            event.reply(res).then(function (data) {
                 // 傳送訊息成功時，可在此寫程式碼
-                console.log(resText);
             }).catch(function (error) {
                 // 傳送訊息失敗時，可在此寫程式碼
                 console.log('錯誤產生，錯誤碼：' + error);

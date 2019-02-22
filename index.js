@@ -157,14 +157,14 @@ bot.on('message', function (event) {
             //     appendMyRow(myId);
             // }
 
-
+            console.log(event.source.userId);
             //回應google試算表對應文字
             var msg = event.message.text;
             //收到文字訊息時，直接把收到的訊息傳回去
             var res = '';
             for (let i = 0; i < myQuestions.length; i++) {
                 if (msg == myQuestions[i][0]) {
-                    res = myQuestions[i][1];
+                    res += myQuestions[i][1];
                 }
             }
             //回傳圖片

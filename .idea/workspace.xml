@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7c7f012f-52ec-4638-82c8-daea036802fc" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
-    </list>
+    <list default="true" id="7c7f012f-52ec-4638-82c8-daea036802fc" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -20,8 +17,8 @@
       <file leaf-file-name="index.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="421">
-              <caret line="166" column="25" selection-start-line="166" selection-start-column="25" selection-end-line="166" selection-end-column="25" />
+            <state relative-caret-position="1968">
+              <caret line="159" column="19" selection-start-line="159" selection-start-column="12" selection-end-line="159" selection-end-column="19" />
             </state>
           </provider>
         </entry>
@@ -62,6 +59,7 @@
       <find>appendMyRow</find>
       <find>myQuestions</find>
       <find>token</find>
+      <find>console</find>
     </findStrings>
     <replaceStrings>
       <replace>'</replace>
@@ -160,12 +158,12 @@
       <workItem from="1550562879133" duration="19224000" />
       <workItem from="1550655482550" duration="1517000" />
       <workItem from="1550825142262" duration="1006000" />
-      <workItem from="1550827162684" duration="947000" />
+      <workItem from="1550827162684" duration="1863000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="30772000" />
+    <option name="totallyTimeSpent" value="31688000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -325,8 +323,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="421">
-          <caret line="166" column="25" selection-start-line="166" selection-start-column="25" selection-end-line="166" selection-end-column="25" />
+        <state relative-caret-position="1968">
+          <caret line="159" column="19" selection-start-line="159" selection-start-column="12" selection-end-line="159" selection-end-column="19" />
         </state>
       </provider>
     </entry>

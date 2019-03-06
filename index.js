@@ -192,8 +192,8 @@ bot.on('message', function (event) {
                     // 登入一波
                     superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
                     .send({
-                        pixiv_id : '', // 帳號
-                        password : '', // 密碼
+                        pixiv_id : 'eddyc2005', // 帳號
+                        password : '29179165', // 密碼
                         post_key : postKey
                     })
                     .set('Cookie', cookie)

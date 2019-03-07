@@ -8,6 +8,7 @@ var request = require('request');
 var superagent = require("superagent");
 var cheerio = require("cheerio");
 var S = require('underscore.string');
+var image2base64 = require('image-to-base64');
 
 var postKey, cookie;
 
@@ -118,7 +119,7 @@ function appendMyRow(userId) {
         valueInputOption: 'RAW',
         resource: {
             'values': [
-                users[userId].replies
+            users[userId].replies
             ]
         }
     };
@@ -133,7 +134,7 @@ function appendMyRow(userId) {
 
 //LineBot收到user的文字訊息時的處理函式
 bot.on('message', function (event) {
-        if (event.message.type === 'text') {
+    if (event.message.type === 'text') {
             //google sheet
             // var myId = event.source.userId;
             // if (users[myId] == undefined) {
@@ -172,81 +173,12 @@ bot.on('message', function (event) {
                 }
             }
             //回傳圖片
-            if(msg == '圖') {
-
-                // 連到登入頁
-                superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
-                .redirects(0)
-                .end(function (err, resp) {
-
-                    if (err) {
-                        return next(err);
-                    }
-                    var index = cheerio.load(resp.text);
-
-                    // 每次進入頁面會有不同post_key，要繼續沿用
-                    postKey = index('input[name="post_key"]').attr('value');
-                    cookie = resp.headers["set-cookie"];
-                    console.log(postKey);
-
-                    // 登入一波
-                    superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
-                    .send({
-                        pixiv_id : '', // 帳號
-                        password : '', // 密碼
-                        post_key : postKey
-                    })
-                    .set('Cookie', cookie)
-                    .redirects(0)
-                    .end(function(){
-
-                        // 連到每日排行
-                        superagent.get('https://www.pixiv.net/ranking.php?mode=daily')
-                        .set('Cookie', cookie)
-                        .redirects(0)
-                        .end(function(err, resp){
-
-                            var dailyDoc = cheerio.load(resp.text);
-
-                            // 隨機個每日排行(第一頁[一頁50筆])
-                            var randomNumber = Math.floor(Math.random()*50);
-                            console.log(randomNumber);
-                            var pictureUrl = 'https://www.pixiv.net' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href');
-
-                            // 連到圖片頁
-                            superagent.get(pictureUrl)
-                            .set('Cookie', cookie)
-                            .redirects(0)
-                            .end(function(err, resp){
-
-                                var picDoc = cheerio.load(resp.text);
-
-                                    // 縮圖url
-                                    var smallUrl = picDoc('img').get(1).attribs.src;
-
-                                    // 大圖url
-                                    var originUrl = 'https://i.pximg.net/img-master/img' + S.strRightBack(smallUrl, 'img');
-                                    console.log(originUrl);
-
-                                    res = {
-                                        "type": "image",
-                                        "originalContentUrl": originUrl,
-                                        "previewImageUrl": smallUrl
-                                    }
-                                });    
-                        });    
-                    });
-                });
+            if(S.include(msg , '圖')) {
+                console.log('圖');
+                danbooru(event, res);
             }
-            event.reply(res).then(function (data) {
-                // 傳送訊息成功時，可在此寫程式碼
-            }).catch(function (error) {
-                // 傳送訊息失敗時，可在此寫程式碼
-                console.log('錯誤產生，錯誤碼：' + error);
-            });
         }
-    }
-);
+    });
 
 
 //這是發送訊息給user的函式
@@ -270,3 +202,167 @@ var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
 });
+
+// danbooru
+var danbooru = async (e, r) => {
+    var temp = false;
+    while(!temp){
+        console.log('temp : ' + temp);
+        await crawl(r).then((x)=>{
+            console.log('x : ' + x);
+            if(x){
+                temp = true;
+                return new Promise((resolve)=>{
+                    e.reply(x).then(function (data) {
+                        // 傳送訊息成功時，可在此寫程式碼
+                        console.log('傳送成功');
+                    }).catch(function (error) {
+                        // 傳送訊息失敗時，可在此寫程式碼
+                        console.log('錯誤產生，錯誤碼：' + error);
+                    });
+                });
+            }    
+        });
+    }
+}
+
+var i = 0;
+var banWord = [
+    'nipple',
+    'nude',
+    'pussy',
+    'juice',
+    'sex'
+];
+var crawl = (res) => {
+
+    return new Promise(resolve => {
+        superagent.get('https://danbooru.donmai.us/posts/random')
+        .redirects(1)
+        .end((err, resp) => {
+
+            i++;
+            if (err) {
+                console.log('GG2');
+                return next(err);
+            }
+
+            var random = cheerio.load(resp.text);
+            var flag = true;
+            
+            // safe rating
+            if(!S.include(random('section#image-container').attr('data-rating'), 's')){
+                console.log('unsafe');
+                flag = false;
+            }
+
+            // 黑名單標籤
+            // for(var t = 0 ; t < banWord.length ; t++){
+            //     if(S.include(random('section#image-container').attr('data-tags'), banWord[t])){
+            //         console.log('data-tags num ' + i + ' : ' + random('section#image-container').attr('data-tags'));
+            //         flag = false;
+            //         break;
+            //     }
+            // }
+
+            // 評分
+            if(random('section#image-container').attr('data-score') < 8){
+                console.log('bad');
+                flag = false;
+            }
+
+            if(flag){
+                console.log(random('section#image-container').attr('data-large-file-url'));
+                console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
+                var originUrl = random('section#image-container').attr('data-large-file-url');
+
+                res = {
+                    "type": "image",
+                    "originalContentUrl": originUrl ,
+                    "previewImageUrl": originUrl
+                };
+            } else {
+                res = false;
+            }
+            console.log('async : ' + res);
+            resolve(res);
+        })
+
+    });
+}
+
+// 拉基P網
+var pixiv = function(){
+
+    // 連到登入頁
+    superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+    .redirects(0)
+    .end(function (err, resp) {
+
+        if (err) {
+            return next(err);
+        }
+        var index = cheerio.load(resp.text);
+
+        // 每次進入頁面會有不同post_key，要繼續沿用
+        postKey = index('input[name="post_key"]').attr('value');
+        cookie = resp.headers["set-cookie"];
+        console.log(postKey);
+
+        // 登入一波
+        superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
+        .send({
+            pixiv_id : '', // 帳號
+            password : '', // 密碼
+            post_key : postKey
+        })
+        .set('Cookie', cookie)
+        .redirects(0)
+        .end(function(){
+
+            // 連到每日排行
+            superagent.get('https://www.pixiv.net/ranking.php?mode=daily')
+            .set('Cookie', cookie)
+            .redirects(0)
+            .end(function(err, resp){
+
+                var dailyDoc = cheerio.load(resp.text);
+
+                // 隨機個每日排行(第一頁[一頁50筆])
+                var randomNumber = Math.floor(Math.random()*50);
+                console.log(randomNumber);
+                var pictureUrl = 'https://www.pixiv.net' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href');
+
+                // 連到圖片頁
+                superagent.get(pictureUrl)
+                .set('Cookie', cookie)
+                .redirects(0)
+                .end(function(err, resp){
+
+                    var picDoc = cheerio.load(resp.text);
+
+                    // 縮圖url
+                    var smallUrl = picDoc('img').get(1).attribs.src;
+
+                    // 大圖url
+                    var originUrl = 'https://i.pximg.net/img-master/img' + S.strRightBack(smallUrl, 'img');                                 
+                    console.log(pictureUrl);
+                    res = {
+                        "type": "text",
+                        "text" : pictureUrl
+                        // "originalContentUrl": originUrl ,
+                        // "previewImageUrl": originUrl
+                    }
+
+                    event.reply(res).then(function (data) {
+                                // 傳送訊息成功時，可在此寫程式碼
+                                console.log('傳送成功');
+                            }).catch(function (error) {
+                                // 傳送訊息失敗時，可在此寫程式碼
+                                console.log('錯誤產生，錯誤碼：' + error);
+                            });
+                        });    
+            });    
+        });
+    });
+}

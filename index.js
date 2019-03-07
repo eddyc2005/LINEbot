@@ -209,7 +209,7 @@ var danbooru = async (e, r) => {
     while(!temp){
         console.log('temp : ' + temp);
         await crawl(r).then((x)=>{
-            console.log('x : ' + x);
+            // console.log('x : ' + x);
             if(x){
                 temp = true;
                 return new Promise((resolve)=>{
@@ -284,7 +284,7 @@ var crawl = (res) => {
             } else {
                 res = false;
             }
-            console.log('async : ' + res);
+            // console.log('async : ' + res);
             resolve(res);
         })
 

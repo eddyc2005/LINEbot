@@ -65,12 +65,13 @@ var auth = new googleAuth();
 var oauth2Client = new google.auth.OAuth2(myClientSecret.installed.client_id, myClientSecret.installed.client_secret, myClientSecret.installed.redirect_uris[0]);
 
 //底下輸入sheetsapi.json檔案的內容
+
 oauth2Client.credentials = {
-    "access_token": "ya29.Glu1BqFmF3z3OtkBUr024AkndG52cmNUv97LuJWwy1xIJq1Ootdt03lhrNcK24zYzdwxvEfxbkHiBpGTiRr-AuHHfL-0SqSiu5ney8XFOvA1nZ8dmPQOlaCXN6BI",
-    "refresh_token": "1/BGGJjKuNmnm4kC_jwJe9dD-RSZjjn7xVpHR5ReRqBtk",
+    "access_token": "ya29.Glu2BvY5XWlNih0vLww0bUmHSqgaz_q2AsErD68HBVj9lzbu4huECgz2xYrQtLjsl3ZxB1tlcbdyyruGSk2vlZAy0lHyHBgMKRcOzGqsBdy196ktHU-TO870nHj-",
+    "refresh_token": "1/xl6i_WpqcH8e8CxLmGA-4ktQp2URn3q0FluNCp-a4x0",
     "scope": "https://www.googleapis.com/auth/spreadsheets",
     "token_type": "Bearer",
-    "expiry_date": 1550576476783
+    "expiry_date": 1550637020960
 }
 
 //試算表的ID，引號不能刪掉
@@ -119,7 +120,7 @@ function appendMyRow(userId) {
         valueInputOption: 'RAW',
         resource: {
             'values': [
-            users[userId].replies
+                users[userId].replies
             ]
         }
     };
@@ -135,50 +136,53 @@ function appendMyRow(userId) {
 //LineBot收到user的文字訊息時的處理函式
 bot.on('message', function (event) {
     if (event.message.type === 'text') {
-            //google sheet
-            // var myId = event.source.userId;
-            // if (users[myId] == undefined) {
-            //     users[myId] = [];
-            //     users[myId].userId = myId;
-            //     users[myId].step = -1;
-            //     users[myId].replies = [];
-            // }
-            // var myStep = users[myId].step;
-            // if (myStep === -1)
-            //     sendMessage(event, myQuestions[0][0]);
-            // else {
-            //     if (myStep == (totalSteps - 1))
-            //         sendMessage(event, myQuestions[1][myStep]);
-            //     else
-            //         sendMessage(event, myQuestions[1][myStep] + '\n' + myQuestions[0][myStep + 1]);
-            //     users[myId].replies[myStep + 1] = event.message.text;
-            // }
-            // myStep++;
-            // users[myId].step = myStep;
-            // if (myStep >= totalSteps) {
-            //     myStep = -1;
-            //     users[myId].step = myStep;
-            //     users[myId].replies[0] = new Date();
-            //     appendMyRow(myId);
-            // }
+        //google sheet
+        // var myId = event.source.userId;
+        // if (users[myId] == undefined) {
+        //     users[myId] = [];
+        //     users[myId].userId = myId;
+        //     users[myId].step = -1;
+        //     users[myId].replies = [];
+        // }
+        // var myStep = users[myId].step;
+        // if (myStep === -1)
+        //     sendMessage(event, myQuestions[0][0]);
+        // else {
+        //     if (myStep == (totalSteps - 1))
+        //         sendMessage(event, myQuestions[1][myStep]);
+        //     else
+        //         sendMessage(event, myQuestions[1][myStep] + '\n' + myQuestions[0][myStep + 1]);
+        //     users[myId].replies[myStep + 1] = event.message.text;
+        // }
+        // myStep++;
+        // users[myId].step = myStep;
+        // if (myStep >= totalSteps) {
+        //     myStep = -1;
+        //     users[myId].step = myStep;
+        //     users[myId].replies[0] = new Date();
+        //     appendMyRow(myId);
+        // }
 
-            console.log(event.source.userId);
-            //回應google試算表對應文字
-            var msg = event.message.text;
-            //收到文字訊息時，直接把收到的訊息傳回去
-            var res = '';
-            for (let i = 0; i < myQuestions.length; i++) {
-                if (msg == myQuestions[i][0]) {
-                    res += myQuestions[i][1];
-                }
-            }
-            //回傳圖片
-            if(S.include(msg , '圖')) {
-                console.log('圖');
-                danbooru(event, res);
+        console.log(event.source.userId);
+        //回應google試算表對應文字
+        var msg = event.message.text;
+        //收到文字訊息時，直接把收到的訊息傳回去
+        var res = '';
+        for (let i = 0; i < myQuestions.length; i++) {
+            if (msg == myQuestions[i][0]) {
+                res += myQuestions[i][1];
             }
         }
-    });
+        if(res!=''){
+            sendMessage(event, res);
+        }
+        //回傳圖片
+        if (S.include(msg, '圖')) {
+            console.log('圖');
+            danbooru(event, res);
+        }
+    }
+});
 
 
 //這是發送訊息給user的函式
@@ -206,13 +210,12 @@ var server = app.listen(process.env.PORT || 3000, function () {
 // danbooru
 var danbooru = async (e, r) => {
     var temp = false;
-    while(!temp){
-        console.log('temp : ' + temp);
-        await crawl(r).then((x)=>{
+    while (!temp) {
+        await crawl(r).then((x) => {
             // console.log('x : ' + x);
-            if(x){
+            if (x) {
                 temp = true;
-                return new Promise((resolve)=>{
+                return new Promise((resolve) => {
                     e.reply(x).then(function (data) {
                         // 傳送訊息成功時，可在此寫程式碼
                         console.log('傳送成功');
@@ -221,7 +224,7 @@ var danbooru = async (e, r) => {
                         console.log('錯誤產生，錯誤碼：' + error);
                     });
                 });
-            }    
+            }
         });
     }
 }
@@ -238,131 +241,130 @@ var crawl = (res) => {
 
     return new Promise(resolve => {
         superagent.get('https://danbooru.donmai.us/posts/random')
-        .redirects(1)
-        .end((err, resp) => {
+            .redirects(1)
+            .end((err, resp) => {
 
-            i++;
-            if (err) {
-                console.log('GG2');
-                return next(err);
-            }
+                i++;
+                if (err) {
+                    console.log('GG2');
+                    return next(err);
+                }
 
-            var random = cheerio.load(resp.text);
-            var flag = true;
-            
-            // safe rating
-            if(!S.include(random('section#image-container').attr('data-rating'), 's')){
-                console.log('unsafe');
-                flag = false;
-            }
+                var random = cheerio.load(resp.text);
+                var flag = true;
 
-            // 黑名單標籤
-            // for(var t = 0 ; t < banWord.length ; t++){
-            //     if(S.include(random('section#image-container').attr('data-tags'), banWord[t])){
-            //         console.log('data-tags num ' + i + ' : ' + random('section#image-container').attr('data-tags'));
-            //         flag = false;
-            //         break;
-            //     }
-            // }
+                // safe rating
+                if (!S.include(random('section#image-container').attr('data-rating'), 's')) {
+                    console.log('unsafe');
+                    flag = false;
+                }
 
-            // 評分
-            if(random('section#image-container').attr('data-score') < 8){
-                console.log('bad');
-                flag = false;
-            }
+                // 黑名單標籤
+                // for(var t = 0 ; t < banWord.length ; t++){
+                //     if(S.include(random('section#image-container').attr('data-tags'), banWord[t])){
+                //         console.log('data-tags num ' + i + ' : ' + random('section#image-container').attr('data-tags'));
+                //         flag = false;
+                //         break;
+                //     }
+                // }
 
-            if(flag){
-                console.log(random('section#image-container').attr('data-large-file-url'));
-                console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
-                var originUrl = random('section#image-container').attr('data-large-file-url');
+                // 評分
+                if (random('section#image-container').attr('data-score') < 8) {
+                    flag = false;
+                }
 
-                res = {
-                    "type": "image",
-                    "originalContentUrl": originUrl ,
-                    "previewImageUrl": originUrl
-                };
-            } else {
-                res = false;
-            }
-            // console.log('async : ' + res);
-            resolve(res);
-        })
+                if (flag) {
+                    console.log(random('section#image-container').attr('data-large-file-url'));
+                    console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
+                    var originUrl = random('section#image-container').attr('data-large-file-url');
+
+                    res = {
+                        "type": "image",
+                        "originalContentUrl": originUrl,
+                        "previewImageUrl": originUrl
+                    };
+                } else {
+                    res = false;
+                }
+                // console.log('async : ' + res);
+                resolve(res);
+            })
 
     });
 }
 
 // 拉基P網
-var pixiv = function(){
+var pixiv = function () {
 
     // 連到登入頁
     superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
-    .redirects(0)
-    .end(function (err, resp) {
-
-        if (err) {
-            return next(err);
-        }
-        var index = cheerio.load(resp.text);
-
-        // 每次進入頁面會有不同post_key，要繼續沿用
-        postKey = index('input[name="post_key"]').attr('value');
-        cookie = resp.headers["set-cookie"];
-        console.log(postKey);
-
-        // 登入一波
-        superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
-        .send({
-            pixiv_id : '', // 帳號
-            password : '', // 密碼
-            post_key : postKey
-        })
-        .set('Cookie', cookie)
         .redirects(0)
-        .end(function(){
+        .end(function (err, resp) {
 
-            // 連到每日排行
-            superagent.get('https://www.pixiv.net/ranking.php?mode=daily')
-            .set('Cookie', cookie)
-            .redirects(0)
-            .end(function(err, resp){
+            if (err) {
+                return next(err);
+            }
+            var index = cheerio.load(resp.text);
 
-                var dailyDoc = cheerio.load(resp.text);
+            // 每次進入頁面會有不同post_key，要繼續沿用
+            postKey = index('input[name="post_key"]').attr('value');
+            cookie = resp.headers["set-cookie"];
+            console.log(postKey);
 
-                // 隨機個每日排行(第一頁[一頁50筆])
-                var randomNumber = Math.floor(Math.random()*50);
-                console.log(randomNumber);
-                var pictureUrl = 'https://www.pixiv.net' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href');
-
-                // 連到圖片頁
-                superagent.get(pictureUrl)
+            // 登入一波
+            superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
+                .send({
+                    pixiv_id: '', // 帳號
+                    password: '', // 密碼
+                    post_key: postKey
+                })
                 .set('Cookie', cookie)
                 .redirects(0)
-                .end(function(err, resp){
+                .end(function () {
 
-                    var picDoc = cheerio.load(resp.text);
+                    // 連到每日排行
+                    superagent.get('https://www.pixiv.net/ranking.php?mode=daily')
+                        .set('Cookie', cookie)
+                        .redirects(0)
+                        .end(function (err, resp) {
 
-                    // 縮圖url
-                    var smallUrl = picDoc('img').get(1).attribs.src;
+                            var dailyDoc = cheerio.load(resp.text);
 
-                    // 大圖url
-                    var originUrl = 'https://i.pximg.net/img-master/img' + S.strRightBack(smallUrl, 'img');                                 
-                    console.log(pictureUrl);
-                    res = {
-                        "type": "text",
-                        "text" : pictureUrl
-                        // "originalContentUrl": originUrl ,
-                        // "previewImageUrl": originUrl
-                    }
+                            // 隨機個每日排行(第一頁[一頁50筆])
+                            var randomNumber = Math.floor(Math.random() * 50);
+                            console.log(randomNumber);
+                            var pictureUrl = 'https://www.pixiv.net' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href');
 
-                    event.reply(res).then(function (data) {
-                                // 傳送訊息成功時，可在此寫程式碼
-                                console.log('傳送成功');
-                            }).catch(function (error) {
-                                // 傳送訊息失敗時，可在此寫程式碼
-                                console.log('錯誤產生，錯誤碼：' + error);
-                            });
-                        });    
-            });    
+                            // 連到圖片頁
+                            superagent.get(pictureUrl)
+                                .set('Cookie', cookie)
+                                .redirects(0)
+                                .end(function (err, resp) {
+
+                                    var picDoc = cheerio.load(resp.text);
+
+                                    // 縮圖url
+                                    var smallUrl = picDoc('img').get(1).attribs.src;
+
+                                    // 大圖url
+                                    var originUrl = 'https://i.pximg.net/img-master/img' + S.strRightBack(smallUrl, 'img');
+                                    console.log(pictureUrl);
+                                    res = {
+                                        "type": "text",
+                                        "text": pictureUrl
+                                        // "originalContentUrl": originUrl ,
+                                        // "previewImageUrl": originUrl
+                                    }
+
+                                    event.reply(res).then(function (data) {
+                                        // 傳送訊息成功時，可在此寫程式碼
+                                        console.log('傳送成功');
+                                    }).catch(function (error) {
+                                        // 傳送訊息失敗時，可在此寫程式碼
+                                        console.log('錯誤產生，錯誤碼：' + error);
+                                    });
+                                });
+                        });
+                });
         });
-    });
 }

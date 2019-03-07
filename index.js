@@ -226,7 +226,6 @@ var danbooru = async (e, r) => {
     }
 }
 
-var i = 0;
 var banWord = [
     'nipple',
     'nude',
@@ -241,7 +240,6 @@ var crawl = (res) => {
         .redirects(1)
         .end((err, resp) => {
 
-            i++;
             if (err) {
                 console.log('GG2');
                 return next(err);

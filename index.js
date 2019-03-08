@@ -12,12 +12,17 @@ var image2base64 = require('image-to-base64');
 
 var postKey, cookie;
 
+const prop = {
+    'pixivDailyRange' : 500,
+    'pixiv_id' : 'ooppeek90207@gmail.com',
+    'pixiv_pass' : 'Linlin411'
+}
+
 var bot = linebot({
     channelId: '1647433696',
     channelSecret: 'f6c7469a8be7963b38a15729d432ebf9',
     channelAccessToken: 'HSYNCnsYNe4Xh9g6PdsQZhlh4gEhar4AKbY5+h5BoOUwAE9lXO7AixNcU9cL07/M3Pnnvez+ZV13yh67ssxok5jXqNilT4EG/TRNA8ZucA36/1C4h1MU6b4DgNaVaJG1mlWfueKdHucO5QFx2FOjBQdB04t89/1O/w1cDnyilFU='
 });
-
 
 //回你說的話
 
@@ -305,8 +310,8 @@ var pixiv = ()=>{
         // 登入一波
         superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
         .send({
-            pixiv_id : 'ooppeek90207@gmail.com', // 帳號
-            password : 'Linlin411', // 密碼
+            pixiv_id : '', // 帳號
+            password : '', // 密碼
             post_key : postKey
         })
         .set('Cookie', cookie)
@@ -375,8 +380,8 @@ var pixiv2 = async (e)=>{
                 // 登入一波
                 superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
                 .send({
-                    pixiv_id : 'ooppeek90207@gmail.com', // 帳號
-                    password : 'Linlin411', // 密碼
+                    pixiv_id : prop.pixiv_id, // 帳號
+                    password : prop.pixiv_pass, // 密碼
                     post_key : postKey
                 })
                 .set('Cookie', cookie)
@@ -386,7 +391,7 @@ var pixiv2 = async (e)=>{
                     isLogin = true;
 
                     // 隨機個每日排行
-                    var randomNumber = Math.floor(Math.random()*100);
+                    var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
                     var page = Math.floor(randomNumber/50) + 1;
                     var item = randomNumber%50;
                     console.log(randomNumber);
@@ -416,7 +421,7 @@ var pixiv2 = async (e)=>{
             });
         } else {
             // 隨機個每日排行
-            var randomNumber = Math.floor(Math.random()*100);
+            var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
             var page = Math.floor(randomNumber/50) + 1;
             var item = randomNumber%50;
             console.log(randomNumber);

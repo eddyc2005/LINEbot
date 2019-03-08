@@ -67,7 +67,7 @@ function listMajors(auth) {
     const sheets = google.sheets({version: 'v4', auth});
     sheets.spreadsheets.values.get({
         spreadsheetId: '1S1UMVJ-c942MpfOj5QBEHt2fsbGZzQi-yGLA1xKjle0',
-    range: 'ques!A1:D3',
+    range: 'test!A1:B',
 }, (err, res) => {
         if (err) return console.log('The API returned an error: ' + err);
         const rows = res.data.values;
@@ -75,7 +75,7 @@ function listMajors(auth) {
             console.log('Name, Major:');
 // Print columns A and E, which correspond to indices 0 and 4.
             rows.map((row) => {
-                console.log(`${row[0]}, ${row[1]}, ${row[2]}, ${row[3]}`);
+                console.log(`${row[0]}, ${row[1]}`);
             });
         } else {
             console.log('No data found.');

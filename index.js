@@ -13,9 +13,11 @@ var image2base64 = require('image-to-base64');
 var postKey, cookie;
 
 const prop = {
+    'pixivDailyRange18' : 100,
     'pixivDailyRange' : 500,
     'pixiv_id' : 'ooppeek90207@gmail.com',
-    'pixiv_pass' : 'Linlin411'
+    'pixiv_pass' : 'Linlin411',
+    'dataScore' : 9
 }
 
 var bot = linebot({
@@ -125,7 +127,7 @@ function appendMyRow(userId) {
         valueInputOption: 'RAW',
         resource: {
             'values': [
-                users[userId].replies
+            users[userId].replies
             ]
         }
     };
@@ -185,7 +187,9 @@ bot.on('message', function (event) {
         if (msg == '抽') {
             danbooru(event, res);
         } else if(msg == 'P') {
-            pixiv2(event);
+            pixiv(event);
+        } else if(msg == '壞') {
+            pixiv18(event);
         }
     }
 });
@@ -236,25 +240,25 @@ var danbooru = async (e, r) => {
 }
 
 var banWord = [
-    'nipple',
-    'nude',
-    'pussy',
-    'juice',
-    'sex'
+'nipple',
+'nude',
+'pussy',
+'juice',
+'sex'
 ];
 var crawl = (res) => {
 
     return new Promise(resolve => {
         superagent.get('https://danbooru.donmai.us/posts/random')
-            .redirects(1)
-            .end((err, resp) => {
+        .redirects(1)
+        .end((err, resp) => {
 
-                if (err) {
-                    console.log('GG2');
-                    return next(err);
-                }
+            if (err) {
+                console.log('GG2');
+                return next(err);
+            }
 
-                var random = cheerio.load(resp.text);
+            var random = cheerio.load(resp.text);
 
                 // safe rating
                 if (!S.include(random('section#image-container').attr('data-rating'), 's')) {
@@ -271,7 +275,7 @@ var crawl = (res) => {
                 // }
 
                 // 評分
-                if (random('section#image-container').attr('data-score') < 8) {
+                if (random('section#image-container').attr('data-score') < prop.dataScore) {
                     resolve(false);
                 }
 
@@ -290,165 +294,48 @@ var crawl = (res) => {
     });
 }
 
-// 拉基P網
-var pixiv = ()=>{
-    // 連到登入頁
-    superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
-    .redirects(0)
-    .end(function (err, resp) {
-
-        if (err) {
-            return next(err);
-        }
-        var index = cheerio.load(resp.text);
-
-        // 每次進入頁面會有不同post_key，要繼續沿用
-        postKey = index('input[name="post_key"]').attr('value');
-        cookie = resp.headers["set-cookie"];
-        console.log(postKey);
-
-        // 登入一波
-        superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
-        .send({
-            pixiv_id : '', // 帳號
-            password : '', // 密碼
-            post_key : postKey
-        })
-        .set('Cookie', cookie)
-        .redirects(0)
-        .end(function(){
-
-            // 連到每日排行
-            superagent.get('https://www.pixiv.net/ranking.php?mode=daily&content=illust')
-            .set('Cookie', cookie)
-            .redirects(0)
-            .end(function(err, resp){
-
-                var dailyDoc = cheerio.load(resp.text);
-
-                // 隨機個每日排行(第一頁)
-                var randomNumber = Math.floor(Math.random()*50);
-                console.log(randomNumber);
-
-                // var pictureUrl = 'https://www.pixiv.net' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href');
-                console.log('ID : ' + cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href'));
-                var pictureId = S.strRightBack(cheerio.load(dailyDoc('.ranking-image-item').get(randomNumber))('a').attr('href'), 'illust_id=');
-                pixivWithDan(pictureId);
-
-                // // 連到圖片頁
-                // superagent.get(pictureUrl)
-                // .set('Cookie', cookie)
-                // .redirects(0)
-                // .end(function(err, resp){
-
-                //     var picDoc = cheerio.load(resp.text);
-
-                //         // 縮圖url
-                //         var downloadUrl = picDoc('img').get(1).attribs.src;
-
-                //         // 大圖url
-                //         // downloadUrl = 'https://i.pximg.net/img-master/img' + S.strRightBack(downloadUrl, 'img');
-                //         console.log(downloadUrl);
-                //     });    
-            });    
-        });
-    });
-}
-
-var isLogin = false;
-var pixiv2 = async (e)=>{
+var pixiv = async (e)=>{
 
     var p = () => {
         return new Promise((resolve)=>{
-        if(!isLogin) {
             // 連到登入頁
             superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
             .redirects(0)
             .set('user-agent' , 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
             .end(function (err, resp) {
 
-                if (err) {
-                    return next(err);
-                }
                 var index = cheerio.load(resp.text);
-
-                // 每次進入頁面會有不同post_key，要繼續沿用
                 postKey = index('input[name="post_key"]').attr('value');
-                cookie = resp.headers["set-cookie"];
-                console.log(postKey);
 
-                // 登入一波
-                superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
-                .send({
-                    pixiv_id : prop.pixiv_id, // 帳號
-                    password : prop.pixiv_pass, // 密碼
-                    post_key : postKey
+                // 隨機個每日排行
+                var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
+                var page = Math.floor(randomNumber/50) + 1;
+                var item = randomNumber%50;
+                console.log(randomNumber);
+
+                // 連到每日排行
+                superagent.get('https://www.pixiv.net/ranking.php?mode=daily&content=illust')
+                .query({
+                    'mode':'daily',
+                    'content':'illust',
+                    'p':page,
+                    'tt':postKey,
+                    'format':'json'
                 })
-                .set('Cookie', cookie)
+                // .set('Cookie', cookie)
                 .redirects(0)
-                .end(function(resp){
+                .end(function(err, resp){
 
-                    isLogin = true;
+                    var dailyDoc = cheerio.load(resp.text);
 
-                    // 隨機個每日排行
-                    var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
-                    var page = Math.floor(randomNumber/50) + 1;
-                    var item = randomNumber%50;
-                    console.log(randomNumber);
+                    var pixivId = JSON.parse(resp.text).contents[item].illust_id;
 
-                    // 連到每日排行
-                    superagent.get('https://www.pixiv.net/ranking.php?mode=daily&content=illust')
-                    .query({
-                        'mode':'daily',
-                        'content':'illust',
-                        'p':page,
-                        'tt':postKey,
-                        'format':'json'
-                    })
-                    .set('Cookie', cookie)
-                    .redirects(0)
-                    .end(function(err, resp){
-
-                        var dailyDoc = cheerio.load(resp.text);
-
-                        var pixivId = JSON.parse(resp.text).contents[item].illust_id;
-
-                        pixivWithDan(pixivId).then((s)=>{
-                            resolve(s);
-                        });
-                    });    
+                    pixivWithDan(pixivId).then((s)=>{
+                        resolve(s);
+                    });
                 });
             });
-        } else {
-            // 隨機個每日排行
-            var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
-            var page = Math.floor(randomNumber/50) + 1;
-            var item = randomNumber%50;
-            console.log(randomNumber);
-
-            // 連到每日排行
-            superagent.get('https://www.pixiv.net/ranking.php?mode=daily&content=illust')
-            .query({
-                'mode':'daily',
-                'content':'illust',
-                'p':page,
-                'tt':postKey,
-                'format':'json'
-            })
-            .set('Cookie', cookie)
-            .redirects(0)
-            .end(function(err, resp){
-
-                var dailyDoc = cheerio.load(resp.text);
-
-                var pixivId = JSON.parse(resp.text).contents[item].illust_id;
-
-                pixivWithDan(pixivId).then((s)=>{
-                    resolve(s);
-                });
-            });
-        }
-    });
+        });
 
     }
     
@@ -495,4 +382,140 @@ var pixivWithDan = (pixivId) => {
             resolve(temp);
         });
     });
+}
+
+var isLogin = false;
+var pixiv18 = async (e)=>{
+
+    var p = () => {
+        return new Promise((resolve)=>{
+            console.log('有登入嗎 : ' + isLogin);
+            if(!isLogin){
+                // 連到登入頁
+                superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+                .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+                .set('referer', 'https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+                .set('Origin', 'https://accounts.pixiv.net')
+                .set('content-type', 'application/x-www-form-urlencoded')
+                .set('accept', 'application/json')
+                .redirects(0)
+                .end(function (err, resp) {
+
+                    if (err) {
+                        return next(err);
+                    }
+                    var index = cheerio.load(resp.text);
+
+                    // 每次進入頁面會有不同post_key，要繼續沿用
+                    postKey = index('input[name="post_key"]').attr('value');
+                    cookie = resp.headers["set-cookie"];
+                    console.log(postKey);
+
+                    // 登入一波
+                    superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
+                    .send({
+                        pixiv_id : 'ooppeek90207@gmail.com', // 帳號
+                        password : 'Linlin411', // 密碼
+                        post_key : postKey,
+                        source : 'pc',
+                        ref : 'wwwtop_accounts_index',
+                        return_to : 'https://www.pixiv.net/'
+                    })
+                    .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+                    .set('referer', 'https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+                    .set('Origin', 'https://accounts.pixiv.net')
+                    .set('content-type', 'application/x-www-form-urlencoded')
+                    .set('accept', 'application/json')
+                    .redirects(1)
+                    .set('Cookie', cookie)
+                    .end(function(res, err){
+
+                        isLogin = true;
+                        cookie = err.headers["set-cookie"];
+
+                        // 隨機個每日排行
+                        var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange18);
+                        var page = Math.floor(randomNumber/50) + 1;
+                        var item = randomNumber%50;
+                        console.log(randomNumber);
+
+                        // 連到每日排行
+                        superagent.get('https://www.pixiv.net/ranking.php')
+                        .query({
+                            'mode':'daily_r18',
+                            'p':page,
+                            'tt':postKey,
+                            'format':'json'
+                        })
+                        .set('Cookie', cookie)
+                        .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+                        .set('referer', 'https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+                        .set('Origin', 'https://accounts.pixiv.net')
+                        .set('content-type', 'application/x-www-form-urlencoded')
+                        .set('accept', 'application/json')
+                        .redirects(0)
+                        .end(function(err, resp){
+
+                            var pixivId = JSON.parse(resp.text).contents[item].illust_id;
+
+                            pixivWithDan(pixivId).then((s)=>{
+                                resolve(s);
+                            });
+                        });    
+                    });
+                });
+            } else{
+                // 隨機個每日排行
+                var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange18);
+                var page = Math.floor(randomNumber/50) + 1;
+                var item = randomNumber%50;
+                console.log(randomNumber);
+
+                // 連到每日排行
+                superagent.get('https://www.pixiv.net/ranking.php')
+                .query({
+                    'mode':'daily_r18',
+                    'p':page,
+                    'tt':postKey,
+                    'format':'json'
+                })
+                .set('Cookie', cookie)
+                .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+                .set('referer', 'https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
+                .set('Origin', 'https://accounts.pixiv.net')
+                .set('content-type', 'application/x-www-form-urlencoded')
+                .set('accept', 'application/json')
+                .redirects(0)
+                .end(function(err, resp){
+
+                    var pixivId = JSON.parse(resp.text).contents[item].illust_id;
+
+                    pixivWithDan(pixivId).then((s)=>{
+                        resolve(s);
+                    });
+                });
+            }
+        });
+
+    }
+    
+    var temp = false;
+    while (!temp) {
+        await p().then((x) => {
+            console.log(x);
+            if (x) {
+                temp = true;
+                new Promise((resolve) => {
+                    e.reply(x).then(function (data) {
+                        // 傳送訊息成功時，可在此寫程式碼
+                        console.log('傳送成功');
+                    }).catch(function (error) {
+                        // 傳送訊息失敗時，可在此寫程式碼
+                        console.log('錯誤產生，錯誤碼：' + error);
+                    });
+                });
+            }
+        });
+    }
+    
 }

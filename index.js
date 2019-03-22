@@ -279,8 +279,8 @@ var crawl = (res) => {
                     resolve(false);
                 }
 
-                console.log(random('section#image-container').attr('data-large-file-url'));
-                console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
+                // console.log(random('section#image-container').attr('data-large-file-url'));
+                // console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
                 var originUrl = random('section#image-container').attr('data-large-file-url');
 
                 res = {
@@ -311,10 +311,10 @@ var pixiv = async (e)=>{
                 var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange);
                 var page = Math.floor(randomNumber/50) + 1;
                 var item = randomNumber%50;
-                console.log(randomNumber);
+                // console.log(randomNumber);
 
                 // 連到每日排行
-                superagent.get('https://www.pixiv.net/ranking.php?mode=daily&content=illust')
+                superagent.get('https://www.pixiv.net/ranking.php')
                 .query({
                     'mode':'daily',
                     'content':'illust',
@@ -342,7 +342,7 @@ var pixiv = async (e)=>{
     var temp = false;
     while (!temp) {
         await p().then((x) => {
-            console.log(x);
+            // console.log(x);
             if (x) {
                 temp = true;
                 new Promise((resolve) => {
@@ -371,7 +371,7 @@ var pixivWithDan = (pixivId) => {
             picUrl = pixiv('article.post-preview').attr('data-large-file-url');
             console.log(picUrl);
             if(S.endsWith(picUrl, 'webm') || !picUrl){
-                console.log(resp.text);
+                // console.log(resp.text);
                 resolve(false);
             } 
             var temp = {
@@ -414,8 +414,8 @@ var pixiv18 = async (e)=>{
                     // 登入一波
                     superagent.post('https://accounts.pixiv.net/api/login?lang=zh_tw')
                     .send({
-                        pixiv_id : 'ooppeek90207@gmail.com', // 帳號
-                        password : 'Linlin411', // 密碼
+                        pixiv_id : prop.pixiv_id, // 帳號
+                        password : prop.pixiv_pass, // 密碼
                         post_key : postKey,
                         source : 'pc',
                         ref : 'wwwtop_accounts_index',

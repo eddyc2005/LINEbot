@@ -235,6 +235,9 @@ var danbooru = async (e, r) => {
                     });
                 });
             }
+        }).catch((err)=>{
+            console.log('error!!');
+            console.log(err);
         });
     }
 }
@@ -251,12 +254,7 @@ var crawl = (res) => {
     return new Promise(resolve => {
         superagent.get('https://danbooru.donmai.us/posts/random')
         .redirects(1)
-        .end((err, resp) => {
-
-            if (err) {
-                console.log('GG2');
-                return next(err);
-            }
+        .then((resp) => {
 
             var random = cheerio.load(resp.text);
 
@@ -289,7 +287,10 @@ var crawl = (res) => {
                     "previewImageUrl": originUrl
                 };
                 resolve(res);
-            })
+        }).catch((err)=>{
+            console.log('error!!');
+            console.log(err);
+        });
 
     });
 }
@@ -302,7 +303,7 @@ var pixiv = async (e)=>{
             superagent.get('https://accounts.pixiv.net/login?lang=zh_tw&source=pc&view_type=page&ref=wwwtop_accounts_index')
             .redirects(0)
             .set('user-agent' , 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
-            .end(function (err, resp) {
+            .then(function (resp) {
 
                 var index = cheerio.load(resp.text);
                 postKey = index('input[name="post_key"]').attr('value');
@@ -324,7 +325,7 @@ var pixiv = async (e)=>{
                 })
                 // .set('Cookie', cookie)
                 .redirects(0)
-                .end(function(err, resp){
+                .then(function(err, resp){
 
                     var dailyDoc = cheerio.load(resp.text);
 
@@ -333,7 +334,13 @@ var pixiv = async (e)=>{
                     pixivWithDan(pixivId).then((s)=>{
                         resolve(s);
                     });
+                }).catch((err)=>{
+                    console.log('error!!');
+                    console.log(err);
                 });
+            }).catch((err)=>{
+                console.log('error!!');
+                console.log(err);
             });
         });
 
@@ -355,6 +362,9 @@ var pixiv = async (e)=>{
                     });
                 });
             }
+        }).catch((err)=>{
+            console.log('error!!');
+            console.log(err);
         });
     }
     
@@ -365,7 +375,7 @@ var pixivWithDan = (pixivId) => {
     return new Promise((resolve)=>{
         superagent.get('https://danbooru.donmai.us/posts?tags=pixiv%3A' + pixivId)
         .redirects(0)
-        .end(function (err, resp) {
+        .then(function (err, resp) {
 
             var pixiv = cheerio.load(resp.text);
             picUrl = pixiv('article.post-preview').attr('data-large-file-url');
@@ -380,6 +390,9 @@ var pixivWithDan = (pixivId) => {
                 "previewImageUrl": picUrl
             };
             resolve(temp);
+        }).catch((err)=>{
+            console.log('error!!');
+            console.log(err);
         });
     });
 }
@@ -399,11 +412,8 @@ var pixiv18 = async (e)=>{
                 .set('content-type', 'application/x-www-form-urlencoded')
                 .set('accept', 'application/json')
                 .redirects(0)
-                .end(function (err, resp) {
+                .then(function (resp) {
 
-                    if (err) {
-                        return next(err);
-                    }
                     var index = cheerio.load(resp.text);
 
                     // 每次進入頁面會有不同post_key，要繼續沿用
@@ -428,10 +438,10 @@ var pixiv18 = async (e)=>{
                     .set('accept', 'application/json')
                     .redirects(1)
                     .set('Cookie', cookie)
-                    .end(function(res, err){
+                    .then(function(res){
 
                         isLogin = true;
-                        cookie = err.headers["set-cookie"];
+                        cookie = res.headers["set-cookie"];
 
                         // 隨機個每日排行
                         var randomNumber = Math.floor(Math.random()*prop.pixivDailyRange18);
@@ -454,15 +464,27 @@ var pixiv18 = async (e)=>{
                         .set('content-type', 'application/x-www-form-urlencoded')
                         .set('accept', 'application/json')
                         .redirects(0)
-                        .end(function(err, resp){
+                        .then(function(resp){
 
                             var pixivId = JSON.parse(resp.text).contents[item].illust_id;
 
                             pixivWithDan(pixivId).then((s)=>{
                                 resolve(s);
+                            }).catch((err)=>{
+                                console.log('error!!');
+                                console.log(err);
                             });
+                        }).catch((err)=>{
+                            console.log('error!!');
+                            console.log(err);
                         });    
+                    }).catch((err)=>{
+                        console.log('error!!');
+                        console.log(err);
                     });
+                }).catch((err)=>{
+                    console.log('error!!');
+                    console.log(err);
                 });
             } else{
                 // 隨機個每日排行
@@ -486,13 +508,19 @@ var pixiv18 = async (e)=>{
                 .set('content-type', 'application/x-www-form-urlencoded')
                 .set('accept', 'application/json')
                 .redirects(0)
-                .end(function(err, resp){
+                .then(function(err, resp){
 
                     var pixivId = JSON.parse(resp.text).contents[item].illust_id;
 
                     pixivWithDan(pixivId).then((s)=>{
                         resolve(s);
+                    }).catch((err)=>{
+                        console.log('error!!');
+                        console.log(err);
                     });
+                }).catch((err)=>{
+                    console.log('error!!');
+                    console.log(err);
                 });
             }
         });
@@ -515,6 +543,9 @@ var pixiv18 = async (e)=>{
                     });
                 });
             }
+        }).catch((err)=>{
+            console.log('error!!');
+            console.log(err);
         });
     }
     

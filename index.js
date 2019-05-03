@@ -325,7 +325,7 @@ var pixiv = async (e)=>{
                 })
                 // .set('Cookie', cookie)
                 .redirects(0)
-                .then(function(err, resp){
+                .then(function(resp){
 
                     var dailyDoc = cheerio.load(resp.text);
 
@@ -375,7 +375,7 @@ var pixivWithDan = (pixivId) => {
     return new Promise((resolve)=>{
         superagent.get('https://danbooru.donmai.us/posts?tags=pixiv%3A' + pixivId)
         .redirects(0)
-        .then(function (err, resp) {
+        .then(function (resp) {
 
             var pixiv = cheerio.load(resp.text);
             picUrl = pixiv('article.post-preview').attr('data-large-file-url');

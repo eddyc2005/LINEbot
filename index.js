@@ -259,13 +259,13 @@ var crawl = (res) => {
             var random = cheerio.load(resp.text);
 
                 // safe rating
-                if (!S.include(random('section#image-container').attr('data-rating'), 's')) {
+                if (!S.include(random('section.image-container').attr('data-rating'), 's')) {
                     resolve(false);
                 }
 
                 // 黑名單標籤
                 // for(var t = 0 ; t < banWord.length ; t++){
-                //     if(S.include(random('section#image-container').attr('data-tags'), banWord[t])){
+                //     if(S.include(random('section.image-container').attr('data-tags'), banWord[t])){
                 //         console.log('data-tags num ' + i + ' : ' + random('section#image-container').attr('data-tags'));
                 //         flag = false;
                 //         break;
@@ -273,13 +273,13 @@ var crawl = (res) => {
                 // }
 
                 // 評分
-                if (random('section#image-container').attr('data-score') < prop.dataScore) {
+                if (random('section.image-container').attr('data-score') < prop.dataScore) {
                     resolve(false);
                 }
 
                 // console.log(random('section#image-container').attr('data-large-file-url'));
                 // console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
-                var originUrl = random('section#image-container').attr('data-large-file-url');
+                var originUrl = random('section.image-container').attr('data-large-file-url');
 
                 res = {
                     "type": "image",

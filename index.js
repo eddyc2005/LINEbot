@@ -277,10 +277,10 @@ var crawl = (res) => {
                     resolve(false);
                 }
 
-                // console.log(random('section#image-container').attr('data-large-file-url'));
+                // console.log(random('section#image-container').attr('data-file-url'));
                 // console.log('data-tags => ' + random('section#image-container').attr('data-tags'));
-                var originUrl = random('section.image-container').attr('data-large-file-url');
-
+                var originUrl = random('section.image-container').attr('data-file-url');
+                console.log(originUrl)
                 res = {
                     "type": "image",
                     "originalContentUrl": originUrl,
@@ -378,7 +378,7 @@ var pixivWithDan = (pixivId) => {
         .then(function (resp) {
 
             var pixiv = cheerio.load(resp.text);
-            picUrl = pixiv('article.post-preview').attr('data-large-file-url');
+            picUrl = pixiv('article.post-preview').attr('data-file-url');
             console.log(picUrl);
             if(S.endsWith(picUrl, 'webm') || !picUrl){
                 // console.log(resp.text);
